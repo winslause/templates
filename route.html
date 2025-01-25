@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Route Management</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+    }
+  
+    /* Sidebar styles */
+    .sidebar {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #f8f9fa;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 2; /* Ensure it stays on top of the content */
+    }
+  
+    .sidebar a {
+      color: #333;
+      font-size: 18px;
+      text-decoration: none;
+      padding: 10px;
+      display: block;
+    }
+  
+    .sidebar a:hover {
+      background-color: #007bff;
+      color: #fff;
+    }
+  
+    /* Content area */
+    .content {
+      margin-left: 250px; /* Adjusted to match the width of the left sidebar */
+      margin-right: 300px; /* Adjusted to match the width of the right sidebar */
+      padding: 20px;
+      height: calc(100vh - 40px);
+      overflow: auto;
+    }
+  
+    /* Right Sidebar for Route Details */
+    .route-details-sidebar {
+      height: 100vh;
+      width: 300px;
+      position: fixed;
+      top: 0;
+      right: 0;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 1px solid #ddd;
+      overflow-y: auto;
+      z-index: 2; /* Ensure it stays on top of the content */
+    }
+  
+    .route-details h4 {
+      font-weight: bold;
+    }
+  
+    .route-status {
+      background-color: #e5f8e8;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      color: #28a745;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  
+    .route-stops {
+      list-style: none;
+      padding-left: 0;
+    }
+  
+    .route-stops li {
+      padding: 5px 0;
+    }
+  
+    /* Stop card styling */
+    .stop-card {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+  
+    /* Map container */
+    #map {
+      height: 100%;
+      width: 100%;
+      min-height: 500px;
+    }
+  
+    /* Additional styles for the form */
+    .form-group select.form-select-sm {
+      width: 200px;
+      display: inline-block;
+    }
+  
+    .form-group label {
+      font-weight: bold;
+    }
+  
+    button[type="submit"] {
+      width: 100%;
+    }
+  
+    /* Driver and Bus Details in Right Sidebar */
+    #driver-details, #bus-details {
+      margin-top: 20px;
+    }
+  
+    #driver-details h4, #bus-details h4 {
+      font-weight: bold;
+    }
+  
+    /* Media queries for responsiveness */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding: 10px 0;
+        white-space: nowrap;
+        overflow-x: auto;
+      }
+  
+      .sidebar a {
+        display: inline-block;
+        font-size: 14px;
+        margin: 0 5px;
+        padding: 5px 10px;
+        white-space: nowrap;
+      }
+  
+      .content {
+        margin-left: 0; /* Reset margins for smaller screens */
+        margin-right: 0;
+        padding-top: 0;
+      }
+  
+      .route-details-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-left: none;
+        border-top: 1px solid #ddd;
+        margin-top: -20px; /* Move up to reduce white space */
+      }
+  
+      #map {
+        min-height: 300px; /* Adjust map height for smaller screens */
+      }
+    }
+  
+    @media (max-width: 576px) {
+      .sidebar a {
+        font-size: 12px;
+        margin: 0 3px;
+        padding: 3px 5px;
+      }
+  
+      #map {
+        min-height: 200px; /* Further adjust map height for very small screens */
+      }
+    }
+  </style>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="container">
+  <!-- Left Sidebar -->
+  <div class="sidebar">
+    <h2>BusTracker</h2>
+    <a href="bus.html"><i class="fas fa-bus"></i> Buses</a>
+    <a href="student.html"><i class="fas fa-users"></i> Students</a>
+    <a href="route.html"><i class="fas fa-route"></i> Routes</a>
+    <a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a>
+    <a href="settings.html"><i class="fas fa-cogs"></i> Settings</a>
+    <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Route Management</h2>
+      <div class="d-flex align-items-center">
+        <img src="https://t3.ftcdn.net/jpg/00/07/32/48/360_F_7324855_mx4CEBWTr81XLOrlQccCROtP2uNR7xbk.jpg" width="40px" height="40px" alt="Admin User" class="rounded-circle">
+        <div class="ml-2">
+          <p class="mb-0">Admin View</p>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Route Selection Dropdown -->
+    <div class="form-group">
+      <!--<select id="viewSelect" class="form-select form-select-sm">
+          <option value="">Select View</option>
+           <option value="admin">Admin View</option>
+          <option value="driver">Driver View</option>
+          <option value="parent">Parent View</option>
+        </select>-->
+    <br>
+<script>
+    document.getElementById('viewSelect').addEventListener('change', function() {
+      const selectedValue = this.value;
+      
+      if (selectedValue === 'admin') {
+        window.location.href = 'index1.html';  // Replace with your actual Admin page link
+      } else if (selectedValue === 'driver') {
+        window.location.href = 'driver.html';  // Replace with your actual Driver page link
+      } else if (selectedValue === 'parent') {
+        window.location.href = 'parent.html';  // Replace with your actual Parent page link
+      }
+    });
+  </script>
+      
+      </div>
+
+  <div class="container mt-5">
+    <h2 class="mb-4 text-center">Add a Stop</h2>
+    <form  id="addStopForm">
+        <div class="row mb-3">
+            <label for="route" class="col-sm-2 col-form-label">Select Route</label>
+            <div class="col-sm-10">
+                <select class="form-select" id="route" required>
+                    <option value="" disabled selected>Select Route</option>
+                    <option value="stopsRoute1">Route 1</option>
+                    <option value="stopsRoute2">Route 2</option>
+                    <option value="stopsRoute3">Route 3</option>
+                    <option value="stopsRoute4">Route 4</option>
+                    <option value="stopsRoute5">Route 5</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label for="lat" class="col-sm-2 col-form-label">Latitude</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="lat" placeholder="Enter latitude" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label for="lng" class="col-sm-2 col-form-label">Longitude</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="lng" placeholder="Enter longitude" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label for="title" class="col-sm-2 col-form-label">Title</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="title" placeholder="Enter stop title" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 offset-sm-2">
+                <button type="submit" class="btn btn-primary">Add Stop</button>
+            </div>
+        </div>
+    </form>
+</div><style>
+        .stop-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            
+        }
+    </style>
+    <label for="routeSelect">Select Route:</label>
+        <select class="form-control" id="routeSelect">
+          <option value="route1">Route 1</option>
+          <option value="route2">Route 2</option>
+          <option value="route3">Route 3</option>
+          <option value="route4">Route 4</option>
+          <option value="route5">Route 5</option>
+        </select>
+      <!-- Map Container -->
+      <div id="map"></div>
+    </div>
+
+    <!-- Right Sidebar for Route Details -->
+  <div class="route-details-sidebar" id="route-details-sidebar">
+    <h4>Route Details</h4>
+    <div id="route-status" class="route-status">Route Status: Active</div>
+    <h5>Stops:</h5>
+    
+    <ul id="route-stops" class="route-stops"></ul>
+   <div id="route-details-sidebar">
+  <!-- Existing content for route details (if any) -->
+
+  <!-- Add Driver and Bus Details -->
+  <div id="driver-details">
+    <h4>Driver Details</h4>
+    <p id="driver-name">Name: </p>
+    <p id="driver-phone">Phone: </p>
+  </div>
+
+  <div id="bus-details">
+    <h4>Bus Details</h4>
+    <p id="bus-model">Model: </p>
+    <p id="bus-number">Number: </p>
+  </div>
+</div>
+
+   
+  </div>
+
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"
+    defer
+  ></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+      // Add this function at the beginning of your script to save data to localStorage
+    function saveToLocalStorage() {
+        localStorage.setItem('routes', JSON.stringify(routes));
+        localStorage.setItem('stopsRoute1', JSON.stringify(stopsRoute1));
+        localStorage.setItem('stopsRoute2', JSON.stringify(stopsRoute2));
+        localStorage.setItem('stopsRoute3', JSON.stringify(stopsRoute3));
+        localStorage.setItem('stopsRoute4', JSON.stringify(stopsRoute4));
+        localStorage.setItem('stopsRoute5', JSON.stringify(stopsRoute5));
+        localStorage.setItem('driverDetails', JSON.stringify(driverDetails));
+        localStorage.setItem('selectedRoute', selectedRoute);
+    }
+
+    // Add this function to load data from localStorage when the page loads
+    function loadFromLocalStorage() {
+        const savedRoutes = localStorage.getItem('routes');
+        const savedStopsRoute1 = localStorage.getItem('stopsRoute1');
+        const savedStopsRoute2 = localStorage.getItem('stopsRoute2');
+        const savedStopsRoute3 = localStorage.getItem('stopsRoute3');
+        const savedStopsRoute4 = localStorage.getItem('stopsRoute4');
+        const savedStopsRoute5 = localStorage.getItem('stopsRoute5');
+        const savedDriverDetails = localStorage.getItem('driverDetails');
+        const savedSelectedRoute = localStorage.getItem('selectedRoute');
+
+        if (savedRoutes) routes = JSON.parse(savedRoutes);
+        if (savedStopsRoute1) stopsRoute1 = JSON.parse(savedStopsRoute1);
+        if (savedStopsRoute2) stopsRoute2 = JSON.parse(savedStopsRoute2);
+        if (savedStopsRoute3) stopsRoute3 = JSON.parse(savedStopsRoute3);
+        if (savedStopsRoute4) stopsRoute4 = JSON.parse(savedStopsRoute4);
+        if (savedStopsRoute5) stopsRoute5 = JSON.parse(savedStopsRoute5);
+        if (savedDriverDetails) driverDetails = JSON.parse(savedDriverDetails);
+        if (savedSelectedRoute) selectedRoute = savedSelectedRoute;
+
+        // If a route was selected before, update the map and UI
+        if (selectedRoute) {
+            updateRoute(selectedRoute);
+        }
+    }
+
+
+
+document.getElementById('addStopForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent the form from submitting in the traditional way
+    
+    // Gather form data
+    const selectedRoute = document.getElementById('route').value;
+    const latitude = document.getElementById('lat').value;
+    const longitude = document.getElementById('lng').value;
+    const title = document.getElementById('title').value;
+
+    // Check if all required fields are filled
+    if (selectedRoute && latitude && longitude && title) {
+        // Convert latitude and longitude to numbers
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+
+        // Add the new stop to the appropriate route array
+        switch(selectedRoute) {
+            case 'stopsRoute1':
+                stopsRoute1.push({ lat: lat, lng: lng, title: title });
+                // Update the routes object here if needed 
+                routes.route1 = stopsRoute1; 
+                break;
+            case 'stopsRoute2':
+                stopsRoute2.push({ lat: lat, lng: lng, title: title });
+                // Update the routes object here if needed 
+                routes.route2 = stopsRoute1; 
+                break;
+            case 'stopsRoute3':
+                stopsRoute3.push({ lat: lat, lng: lng, title: title });
+                // Update the routes object here if needed 
+                routes.route3 = stopsRoute1; 
+                break;
+            case 'stopsRoute4':
+                stopsRoute4.push({ lat: lat, lng: lng, title: title });
+                // Update the routes object here if needed 
+                routes.route4 = stopsRoute1; 
+                break;
+            case 'stopsRoute5':
+                stopsRoute5.push({ lat: lat, lng: lng, title: title });
+                // Update the routes object here if needed 
+                routes.route5 = stopsRoute1; 
+                break;
+
+            default:
+                console.error('Invalid route selected');
+                return; // Exit if an invalid route is selected
+        }
+
+        // Save changes
+        saveToLocalStorage();
+
+        // Update the UI and map with the new stop
+        // Here, we use the route name without 'stops' since that's how it's in the `routes` object
+        updateRoute(selectedRoute.replace('stops', 'route'));
+
+        // Clear form fields after adding stop
+        this.reset();
+    } else {
+        alert('Please fill in all the fields');
+    }
+});
+
+  // Object to hold driver and bus details for each route
+const driverDetails = {
+  route1: { name: "John wachira", phone: "+254710123456", busModel: "Toyota Hiace", busNumber: "KBC 123X" },
+  route2: { name: "Jane wachira", phone: "+254710654321", busModel: "Nissan Urvan", busNumber: "KBC 456Y" },
+  route3: { name: "Tom Ngeche", phone: "+254710789456", busModel: "Mitsubishi Canter", busNumber: "KBC 789Z" },
+  route4: { name: "Ben", phone: "+254705555555", busModel: "Mercedes Sprinter", busNumber: "KBC 101J" },
+  route5: { name: "Mike", phone: "+254706666666", busModel: "Volvo B7R", busNumber: "KBC 202M" }
+};
+
+// Function to update driver and bus details when the route changes
+function updateDriverDetails(route) {
+  const details = driverDetails[route];
+
+  // Update driver details
+  document.getElementById("driver-name").innerText = "Name: " + details.name;
+  document.getElementById("driver-phone").innerText = "Phone: " + details.phone;
+
+  // Update bus details
+  document.getElementById("bus-model").innerText = "Model: " + details.busModel;
+  document.getElementById("bus-number").innerText = "Number: " + details.busNumber;
+}
+
+const stopsRoute1 = [
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
+  { lat: -1.17793, lng: 36.98324, title: 'New Paleah Wholesalers Ltd' },
+  { lat: -1.19513, lng: 36.95832, title: 'MASTER BROWN INTERNATIONAL INSTITUTE' },
+  { lat: -1.19392, lng: 36.93817, title: 'Kahawa Sukari Baptist Church' },
+  { lat: -1.18888, lng: 36.93147, title: 'Ceptacore Systems Limited' },
+  { lat: -1.16824, lng: 36.98919, title: 'Springfield Park' },
+  { lat: -1.19170, lng: 36.92872, title: 'Ruda Education Center' },
+  { lat: -1.16029, lng: 36.95833, title: 'Shell - Kihunguro' },
+  { lat: -1.19475, lng: 36.95216, title: 'Kijana Msafi Caterers' },
+  { lat: -1.16475, lng: 36.95007, title: 'Sara kwa booster' },
+  { lat: -1.19722, lng: 36.90549, title: 'Horeb Ministries Githurai 45' },
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' } // Same starting point for Route 1
+];
+
+const stopsRoute2 = [
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
+  { lat: -1.218972, lng: 36.923028, title: 'Kevis Beauty Salon and Barbershop' },
+  { lat: -1.219500, lng: 36.924278, title: 'Jeremy Entertainments' },
+  { lat: -1.220944, lng: 36.923417, title: 'Carlcare Service Ltd' },
+  { lat: -1.219889, lng: 36.926028, title: 'Riverbank Hotel' },
+  { lat: -1.221333, lng: 36.924250, title: 'Gigiri Towers Apartment' },
+  { lat: -1.223694, lng: 36.922750, title: 'Wema Flats' },
+  { lat: -1.222750, lng: 36.924944, title: 'Dove Apartments' },
+  { lat: -1.221111, lng: 36.927861, title: 'Zion Temple Kasarani' },
+  { lat: -1.221417, lng: 36.926611, title: 'Kibukahs Apartments' },
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' }
+];
+
+const stopsRoute3 = [
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
+  { lat: -1.226500, lng: 36.916972, title: 'Transline Galaxy - Kasarani' },
+  { lat: -1.225611, lng: 36.919361, title: 'PCEA Ciiko Church' },
+  { lat: -1.227083, lng: 36.918667, title: 'Kasarani Hunters Genesis 2nd Street' },
+  { lat: -1.227417, lng: 36.922139, title: 'Santon Chemist' },
+  { lat: -1.225611, lng: 36.923278, title: 'ACK Good Samaritan Church Ciiko' },
+  { lat: -1.229556, lng: 36.921722, title: 'Mwiki Road Hospital & Pharmacy' },
+  { lat: -1.229361, lng: 36.924444, title: 'Anesmar Flats' },
+  { lat: -1.227611, lng: 36.926389, title: 'Claycity Business Center - Kasarani' },
+  { lat: -1.227944, lng: 36.924611, title: 'Rware Flats' },
+  { lat: -1.229361, lng: 36.927194, title: 'Vibramatt Supermarket' },
+  { lat: -1.225778, lng: 36.929000, title: 'LPG Gas Authorized Dealer' },
+  { lat: -1.226167, lng: 36.932833, title: '13th Street - Deliverance Road' },
+  { lat: -1.233028, lng: 36.930306, title: 'Deliverance Church Kasarani Mwiki' },
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' }
+];
+
+const stopsRoute4 = [
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
+  { lat: -1.21744, lng: 36.91133, title: "Beatriz La Roca Apartments" },
+  { lat: -1.21892, lng: 36.91461, title: "Mama Fauzia Children's Home" },
+  { lat: -1.21961, lng: 36.91267, title: "Rosapharm Industrial Park" },
+  { lat: -1.21894, lng: 36.91144, title: "Mwangi Kariba Hardware And Tools" },
+  { lat: -1.22303, lng: 36.91192, title: "Maternity Stage" },
+  { lat: -1.22103, lng: 36.90536, title: "Warren Concrete Ltd" },
+  { lat: -1.21861, lng: 36.90817, title: "Olalem Chemist" },
+  { lat: -1.21706, lng: 36.90533, title: "Arise Apartment, Seasons Kasarani" },
+  { lat: -1.21689, lng: 36.91025, title: "Millenium Heights" },
+  { lat: -1.21497, lng: 36.90892, title: "The Bliss Place" },
+  { lat: -1.21519, lng: 36.90719, title: "Alpine Chalet Kasarani" },
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' }
+];
+
+const stopsRoute5 = [
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
+  { lat: -1.223487, lng: 36.902212, title: "Kasarani Chief's Camp" },
+  { lat: -1.22053, lng: 36.90278, title: "Kasarani Health Centre" },
+  { lat: -1.22206, lng: 36.89928, title: "St. Marys Sportsview Academy" },
+  { lat: -1.21797, lng: 36.89953, title: "Kassmatt Supermarket - Kasarani" },
+  { lat: -1.22089, lng: 36.89647, title: "ENVIRONMENTAL LIAISON CENTRE INTERNATIONAL" },
+  { lat: -1.22431, lng: 36.89489, title: "Gifts By Wiggi" },
+  { lat: -1.22164, lng: 36.89522, title: "HIVE CAR TINTING" },
+  { lat: -1.21992, lng: 36.89419, title: "KARIUKI MURIUKI & COMPANY ADVOCATES" },
+  { lat: -1.21950, lng: 36.88208, title: "Topace Studio Apartments" },
+  { lat: -1.21933, lng: 36.88653, title: "Roybahn Heights Apartments" },
+  { lat: -1.21758, lng: 36.88933, title: "Fleek Car Accessories" },
+  { lat: -1.21536, lng: 36.88614, title: "Happy Life Children's Home" },
+  { lat: -1.21569, lng: 36.88300, title: "Rhoda Muthangya" },
+  { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' }
+];
+
+
+
+
+const routes = {
+  route1: stopsRoute1,
+  route2: stopsRoute2,
+  route3: stopsRoute3,
+   route4: stopsRoute4,
+  route5: stopsRoute5
+};
+
+let map, directionsService, directionsRenderer, busMarker;
+let selectedRoute = 'route1';
+let completedStops = [];  // To track completed stops
+let routePath = [];
+let routeIndex = 0;
+let busInterval;
+
+window.addEventListener('load', function() {
+    loadFromLocalStorage();
+    initMap();
+});
+
+function initMap() {
+  directionsService = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer(
+    {
+      suppressMarkers: true // Suppress default markers
+    }
+  );
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 13,
+    center: { lat: -1.22419, lng: 36.9176 }
+  });
+
+  directionsRenderer.setMap(map);
+  
+  // Initialize traffic layer
+  trafficLayer = new google.maps.TrafficLayer();
+  trafficLayer.setMap(map);
+
+  busMarker = new google.maps.Marker({
+    position: new google.maps.LatLng(stopsRoute1[0].lat, stopsRoute1[0].lng),
+    map: map,
+    icon: {
+      url: 'https://img.icons8.com/color/48/bus.png',
+      scaledSize: new google.maps.Size(40, 40)
+    }
+  });
+
+  updateRoute(selectedRoute);
+}
+
+let currentMarkers = [];  // Array to store current route markers
+
+//let currentMarkers = [];  // Array to store current route markers
+
+function updateRoute(route) {
+  // Clear any existing markers on the map
+  currentMarkers.forEach(marker => marker.setMap(null));
+  currentMarkers = [];  // Reset the markers array
+
+  const selectedStops = routes[route];
+  $('#route-stops').empty();
+  $('#route-status').text('Route Status: Active');
+
+  
+  const waypoints = selectedStops.slice(1, selectedStops.length - 1).map(stop => ({
+    location: new google.maps.LatLng(stop.lat, stop.lng),
+    stopover: true
+  }));
+
+  const request = {
+    origin: new google.maps.LatLng(selectedStops[0].lat, selectedStops[0].lng),
+    destination: new google.maps.LatLng(selectedStops[selectedStops.length - 1].lat, selectedStops[selectedStops.length - 1].lng),
+    waypoints: waypoints,
+    travelMode: google.maps.TravelMode.DRIVING
+  };
+
+  directionsService.route(request, function (response, status) {
+    if (status === google.maps.DirectionsStatus.OK) {
+      directionsRenderer.setDirections(response);
+      routePath = response.routes[0].overview_path;
+
+      selectedStops.forEach(stop => {
+        $('#route-stops').append(`<li class="incomplete">${stop.title}</li>`);
+        
+        // Add custom markers for each stop
+        const marker = new google.maps.Marker({
+          position: { lat: stop.lat, lng: stop.lng },
+          map: map,
+          icon: stop.icon || {
+            url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // Default flat marker image
+            scaledSize: new google.maps.Size(20, 20), // Size of the marker
+            anchor: new google.maps.Point(12, 12) // Center the marker icon
+          }
+        });
+
+        // Store the marker in the currentMarkers array to manage visibility
+        currentMarkers.push(marker);
+      });
+
+      animateBus(routePath);
+      updateDriverDetails(route); // Update driver details when route is updated
+    } else {
+      console.error('Error fetching directions', status);
+    }
+  });
+}
+
+
+function animateBus(path) {
+  if (busInterval) {
+    clearInterval(busInterval); // Stop any previous animation
+  }
+
+  routeIndex = 0;
+  busMarker.setPosition(path[routeIndex]);
+
+  const busMovementTime = 1000;  // 1000 ms for bus movement between stops
+  const stopUpdateTime = 200000;   // 3000 ms for stop update delay
+
+  busInterval = setInterval(function () {
+    if (routeIndex < path.length - 1) {
+      routeIndex++;
+      busMarker.setPosition(path[routeIndex]);
+
+      const currentStop = routes[selectedRoute][routeIndex];
+      const stopElement = $('#route-stops li').eq(routeIndex);
+
+      setTimeout(function () {
+        if (!completedStops.includes(currentStop.title)) {
+          completedStops.push(currentStop.title);
+          stopElement.removeClass('incomplete').addClass('completed');
+          stopElement.text(`${currentStop.title} - Completed`);
+        }
+      }, stopUpdateTime);
+
+    } else {
+      clearInterval(busInterval); // Stop animation when route ends
+      $('#route-status').text('Route Status: Completed');
+    }
+  }, busMovementTime); // Move bus every 'busMovementTime' ms
+}
+
+
+// Change route based on user selection
+$('#routeSelect').on('change', function () {
+  selectedRoute = $(this).val();
+  updateRoute(selectedRoute);
+});
+
+  </script>
+
+</body>
+</html>

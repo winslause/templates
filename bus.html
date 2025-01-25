@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bus Management</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script type="module" src="./bus.ts"></script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+    
+      .sidebar {
+        height: 100vh;
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #f8f9fa;
+        padding: 20px;
+        overflow-y: auto;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        z-index: 1000; /* Ensure sidebar is on top */
+      }
+    
+      .sidebar a {
+        color: #333;
+        font-size: 18px;
+        text-decoration: none;
+        padding: 10px;
+        display: block;
+      }
+    
+      .sidebar a:hover {
+        background-color: #007bff;
+        color: #fff;
+      }
+    
+      .sidebar.collapsed {
+        width: 80px;
+      }
+    
+      .sidebar.collapsed a {
+        text-align: center;
+      }
+    
+      .sidebar.collapsed h2 {
+        display: none;
+      }
+    
+      .content {
+        margin-left: 250px;
+        padding: 20px;
+        height: calc(100vh - 40px);
+        overflow: auto;
+        transition: margin-left 0.3s ease;
+      }
+    
+      .content.collapsed {
+        margin-left: 80px;
+      }
+    
+      .bus-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+    
+      .form-group label {
+        font-weight: bold;
+      }
+    
+      .table th,
+      .table td {
+        text-align: center;
+      }
+    
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+    
+      /* Map container */
+      #map {
+        height: 100%;
+        width: 100%;
+        min-height: 500px; /* Ensure the map has a minimum height */
+        overflow: auto; /* Add scrollbar for map section */
+      }
+    
+      /* Media queries for responsiveness */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: static;
+          padding: 10px 0;
+          white-space: nowrap;
+          overflow-x: auto;
+        }
+    
+        .sidebar a {
+          display: inline-block;
+          font-size: 14px;
+          margin: 0 5px;
+          padding: 5px 10px;
+          white-space: nowrap;
+        }
+    
+        .content {
+          margin-left: 0;
+          padding-bottom: 0; /* Reduce space at the bottom */
+        }
+    
+        .route-details-sidebar {
+          margin-top: -20px; /* Move up the route details to overlap slightly */
+        }
+    
+        #map {
+          min-height: 300px; /* Adjust map height for smaller screens */
+        }
+      }
+    
+      @media (max-width: 576px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: static;
+          padding: 5px 0;
+        }
+    
+        .sidebar a {
+          font-size: 12px;
+          margin: 0 3px;
+          padding: 3px 5px;
+        }
+    
+        .content {
+          margin-left: 0;
+          padding-bottom: 0; /* Reduce space at the bottom */
+        }
+    
+        .route-details-sidebar {
+          margin-top: -20px; /* Move up the route details to overlap slightly */
+        }
+    
+        #map {
+          min-height: 200px; /* Further adjust map height for very small screens */
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Left Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <h2>BusTracker</h2>
+      <a href="bus.html"><i class="fas fa-bus"></i>Buses</a>
+      <a href="student.html"><i class="fas fa-users"></i>Students</a>
+      <a href="route.html"><i class="fas fa-route"></i>Routes</a>
+      <a href="notifications.html"><i class="fas fa-bell"></i>Notifications</a>
+      <a href="settings.html"><i class="fas fa-cogs"></i>Settings</a>
+      <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content" id="content">
+      <div class="header">
+        
+          
+        </button>
+        <h2>Bus Management</h2>
+        <div class="d-flex align-items-center">
+          <img src="https://t3.ftcdn.net/jpg/00/07/32/48/360_F_7324855_mx4CEBWTr81XLOrlQccCROtP2uNR7xbk.jpg" width="40px" height="40px" alt="Admin User" class="rounded-circle">
+          <div class="ml-2">
+            <p class="mb-0">Admin View</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bus Management Card -->
+      <div class="bus-card">
+        <form id="busForm" class="mb-4">
+          <div class="form-row">
+            <div class="col-md-4 mb-3">
+              <label for="busNumber">Bus Number</label>
+              <input type="text" class="form-control" id="busNumber" required />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="driver">Driver</label>
+              <input type="text" class="form-control" id="driver" required />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="capacity">Capacity</label>
+              <input
+                type="number"
+                class="form-control"
+                id="capacity"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-4 mb-3">
+              <label for="status">Status</label>
+              <select class="form-control" id="status" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="phone">Phone Number</label>
+              <input
+                type="text"
+                class="form-control"
+                id="phone"
+                required
+              />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="saveBtn">
+            Add Bus
+          </button>
+        </form>
+      </div>
+
+      <!-- Bus List Table -->
+      <div class="bus-card">
+        <h4>Bus List</h4>
+
+        <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="thead-dark">
+            <tr>
+              <th>Bus Number</th>
+              <th>Driver</th>
+              <th>Capacity</th>
+              <th>Status</th>
+              <th>Phone</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="busTableBody">
+            <!-- Bus data will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Toggle Sidebar
+      document
+        .getElementById("toggleBtn")
+        .addEventListener("click", function () {
+          const sidebar = document.getElementById("sidebar");
+          const content = document.getElementById("content");
+
+          sidebar.classList.toggle("collapsed");
+          content.classList.toggle("collapsed");
+        });
+    </script>
+  </body>
+</html>
