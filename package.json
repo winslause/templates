@@ -31,8 +31,5 @@
     "vite": "^5.4.6"
   },
   "private": true,
-  "dependencies": {
-    "layer-traffic": "file:",
-    "react-router-dom": "^7.0.2"
-  }
+  "dependencies": {}
 }
