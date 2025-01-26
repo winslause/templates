@@ -8,114 +8,200 @@
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
 
     <style>
-      .notification-card {
-        border-left: 4px solid transparent;
-      }
-    
-      .notification-card.new {
-        border-left-color: #3b82f6;
-      }
-    
-      .modal-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-      }
-    
-      .modal-content {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 2rem;
-        max-width: 500px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-    
-      .sidebar {
-        width: 250px;
+      body {
+        display: flex;
         height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
+        margin: 0;
+        background-color: #f3f4f6;
+        overflow: scroll;
+      }
+      body::-webkit-scrollbar {
+        display: none; /* Hide the scrollbar */
+      }
+    
+      .left-sidebar,
+      .right-sidebar {
+        width: 200px;
         background-color: #2d3748;
-        padding: 20px;
         color: white;
-        z-index: 1000; /* Ensure sidebar stays on top */
+        padding: 20px;
+        overflow-y: auto;
       }
-    
-      .sidebar h2 {
-        font-size: 24px;
-        margin-bottom: 20px;
+      .left-sidebar {
+        border-right: 1px solid #374151;
       }
-    
-      .sidebar a {
+      .right-sidebar {
+        border-left: 1px solid #374151;
+      }
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .nav-item {
         display: block;
-        margin: 15px 0;
+        margin-bottom: 15px;
         color: white;
         text-decoration: none;
       }
-    
-      .sidebar a i {
-        margin-right: 10px;
+      .chat-message {
+        max-width: 70%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 10px;
       }
-    
-      .content {
-        margin-left: 260px;
+      .chat-message.sent {
+        align-self: flex-end;
+        background-color: lightblue;
+      }
+      .chat-message.received {
+        align-self: flex-start;
+      }
+      #chat-container {
+        height: 200px;
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .fuel-bar {
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 5px;
+        margin-top: 5px;
+      }
+      .fuel-level {
+        height: 100%;
+        border-radius: 5px;
+      }
+      .notification-card {
+        border-left: 4px solid transparent;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .notification-card.new {
+        border-left-color: #3b82f6;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
         padding: 20px;
-        transition: margin-left 0.3s ease; /* Smooth transition for sidebar collapse */
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .right-sidebar.resizable {
+        position: relative;
+        min-width: 200px;
+        max-width: 500px;
+        transition: width 0.2s;
       }
     
-      /* Media queries for responsiveness */
-      @media (max-width: 768px) {
-        .sidebar {
+      .resize-handle {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 5px;
+        cursor: ew-resize;
+        background-color: #4a5568;
+        z-index: 10;
+      }
+    
+      /* Media query for smaller screens */
+      @media screen and (max-width: 768px) {
+        body {
+          flex-direction: column;
+          overflow-y: scroll; /* Allow for scrolling if content exceeds screen height */
+        }
+    
+        .left-sidebar {
           width: 100%;
           height: auto;
-          position: static;
-          padding: 10px 0;
-          white-space: nowrap;
-          overflow-x: auto;
+          display: flex; /* Use flex for horizontal alignment */
+          justify-content: space-around; /* Space items evenly */
+          padding: 10px 0; /* Adjust padding for top and bottom */
+          border-right: none;
+          overflow-y: visible; /* No need for overflow on this line */
         }
-    
-        .sidebar h2 {
-          display: none; /* Hide the title on smaller screens */
-        }
-    
-        .sidebar a {
+        
+        .nav-item {
           display: inline-block;
-          font-size: 14px;
-          margin: 0 5px;
+          margin: 0;
           padding: 5px 10px;
-          white-space: nowrap;
+          font-size: 10px; /* Smaller font for smaller screens */
         }
     
-        .content {
-          margin-left: 0;
-          padding-top: 0; /* Reduce any top padding to minimize space */
+        .main-content, 
+        .right-sidebar {
+          width: 100%;
+          border: none; /* Remove border since stacking vertically */
+          padding: 10px;
         }
-      }
     
-      @media (max-width: 576px) {
-        .sidebar a {
-          font-size: 12px;
-          margin: 0 3px;
-          padding: 3px 5px;
+        .right-sidebar {
+          /* Remove any positioning or transitions since we're not resizing horizontally */
+          position: static;
+          transition: none;
+        }
+    
+        .main-content {
+          flex: none; /* Remove flex-grow to prevent taking up more space than needed */
+        }
+    
+        /* Combine main content and right sidebar content vertically */
+        .main-content, 
+        .right-sidebar {
+          overflow-y: visible; /* Content will be scrollable through the body */
+        }
+    
+        #chat-container {
+          height: auto; /* Let content dictate height */
+        }
+    
+        /* Ensure all content items are scrollable if they exceed screen height */
+        .notification-card, 
+        .chat-message,
+        .fuel-bar {
+          width: calc(100% - 20px); /* Account for padding */
         }
       }
     </style>
   </head>
 
-  <body class="bg-gray-100">
-    <!-- Left Sidebar -->
-    <div class="sidebar" id="sidebar">
+  <body>
+    <aside class="left-sidebar">
       <h2>BusTracker</h2>
       <a href="stud-driv.html" class="nav-item"
         ><i class="fas fa-users"></i> Students</a
@@ -129,350 +215,447 @@
       <a href="set-driv.html" class="nav-item"
         ><i class="fas fa-cogs"></i> Settings</a
       >
-      <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      <a href="index.html"><i class="fas fa-cogs"></i> Logout</a>
+    </aside>
 
-    </div>
+    <main class="main-content">
+      <div class="flex justify-between items-center mb-4">
+        
+       
+        <script>
+          document
+            .getElementById("viewSelect")
+            .addEventListener("change", function () {
+              const selectedValue = this.value;
 
-    <!-- Main Content Area -->
-    <div class="content">
-      <div class="container mx-auto py-8">
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <h2 class="text-2xl font-bold">Notifications</h2>
-            <!--
-            <center>
-              <select id="viewSelect" class="form-select form-select-sm">
-                <option value="admin">select View</option>
-                <option value="admin">Admin View</option>
-                <option value="driver">Driver View</option>
-                <option value="parent">Parent View</option>
-              </select>
-            </center>-->
-            <script>
-              document
-                .getElementById("viewSelect")
-                .addEventListener("change", function () {
-                  const selectedValue = this.value;
+              if (selectedValue === "admin") {
+                window.location.href = "index1.html"; // Replace with your actual Admin page link
+              } else if (selectedValue === "driver") {
+                window.location.href = "driver.html"; // Replace with your actual Driver page link
+              } else if (selectedValue === "parent") {
+                window.location.href = "parent.html"; // Replace with your actual Parent page link
+              }
+            });
+        </script>
+        
 
-                  if (selectedValue === "admin") {
-                    window.location.href = "index1.html"; // Replace with your actual Admin page link
-                  } else if (selectedValue === "driver") {
-                    window.location.href = "driver.html"; // Replace with your actual Driver page link
-                  } else if (selectedValue === "parent") {
-                    window.location.href = "parent.html"; // Replace with your actual Parent page link
-                  }
-                });
-            </script>
-
-            <!-- <p id="unread-count" class="text-sm text-gray-500">0 unread notifications</p> -->
-          </div>
-          <div class=" gap-4">
-            <button
-              id="send-notification-btn"
-              class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <span class="lucide lucide-message-circle w-4 h-4"></span> Send
-              Notification
-            </button><br>
-            <br>
-            <select
-              id="notification-filter"
-              class="border rounded-lg px-3 py-2"
-            >
-              <option value="all">All Notifications</option>
-              <option value="unread">Unread Only</option>
-            </select>
-          </div>
+        <div class="flex gap-4">
+          
+          <select
+            id="notification-filter"
+            onchange="filterNotifications()"
+            class="border rounded p-2"
+          >
+            <option value="all">All Notifications</option>
+            <option value="unread">Unread Only</option>
+            <option value="read">Read Only</option>
+          </select>
+          <button
+            onclick="openNotificationModal()"
+            class="bg-blue-500 text-white p-2 rounded"
+          >
+            Send Notification
+          </button>
         </div>
+      </div>
+      <div id="notifications-list" class="space-y-4">
+        <!-- Notification cards will be injected here -->
+      </div>
+    </main>
 
-        <!-- Notifications List -->
-        <div id="notifications-list" class="space-y-4">
-          <!-- Notification cards will be injected here -->
-        </div>
+    <aside class="right-sidebar resizable">
+      <div class="resize-handle" id="resizeHandle"></div>
+      <h3>Driver Actions</h3>
+      <div class="driver-select mb-4">
+        <select id="driver-select" style="color: black">
+          <option value="">Driver</option>
+          <option value="Driver 1">1. Jane Wachra</option>
+          <option value="Driver 2">2. Tom Ngeche</option>
+          <option value="Driver 3">3.JANE WACHIRA</option>
+          <option value="Driver 4">4. Ben</option>
+          <option value="Driver 5">5.Kevin</option>
+        </select>
+      </div>
+      <h4>Chat</h4>
+      <div id="chat-container">
+        <!-- Chat messages will be dynamically inserted here -->
+      </div>
+      <input
+        type="text"
+        id="chat-message-input"
+        style="color: black"
+        placeholder="Type your message..."
+        class="w-full mb-2"
+      />
+      <button
+        onclick="sendMessage()"
+        class="w-full bg-blue-500 text-white p-2 rounded"
+      >
+        Send
+      </button>
 
-        <!-- Send Notification Modal -->
-        <div id="send-notification-modal" class="modal-bg hidden">
-          <div class="modal-content">
-            <div class="flex justify-between mb-4">
-              <h3 class="text-lg font-semibold">Send Notification</h3>
-              <button
-                id="close-modal"
-                class="text-gray-500 hover:text-gray-700"
-              >
-                <span class="lucide lucide-x w-5 h-5"></span>
-              </button>
-            </div>
-            <form id="send-notification-form" class="space-y-4">
-              <div>
-                <label
-                  for="notification-type"
-                  class="block text-sm font-medium text-gray-700"
-                  >Type</label
-                >
-                <select
-                  id="notification-type"
-                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                >
-                  <option value="info">Information</option>
-                  <option value="warning">Warning</option>
-                  <option value="error">Error</option>
-                  <option value="success">Success</option>
-                </select>
-              </div>
+      <h4 class="mt-4">Log Fuel</h4>
+      <select id="driver-fuel-select" style="color: black" class="w-full mb-2">
+        <option value="">Driver</option>
+        <option value="Driver 1">Jane Wachra</option>
+        <option value="Driver 2">Tom Ngeche</option>
+        <option value="Driver 3">JANE WACHIRA</option>
+        <option value="Driver 4">Ben</option>
+        <option value="Driver 5">Kevin</option>
+      </select>
+      <input
+        type="number"
+        id="fuel-level"
+        style="color: black"
+        placeholder="Fuel Level (%)"
+        min="0"
+        max="100"
+        class="w-full mb-2"
+      />
+      <button
+        onclick="logFuelLevel()"
+        class="w-full bg-green-500 text-white p-2 rounded mb-2"
+      >
+        Log Fuel
+      </button>
 
-              <div>
-                <label
-                  for="notification-title"
-                  class="block text-sm font-medium text-gray-700"
-                  >Title</label
-                >
-                <input
-                  id="notification-title"
-                  type="text"
-                  required
-                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                />
-              </div>
+      <!-- <h4>Report Maintenance</h4>
+      <input
+        type="text"
+        id="maintenance-issue"
+        placeholder="Describe Issue"
+        class="w-full mb-2"
+      />
+      <button
+        onclick="reportMaintenance()"
+        class="w-full bg-yellow-500 text-white p-2 rounded mb-2"
+      >
+        Report
+      </button> -->
 
-              <div>
-                <label
-                  for="notification-message"
-                  class="block text-sm font-medium text-gray-700"
-                  >Message</label
-                >
-                <textarea
-                  id="notification-message"
-                  rows="3"
-                  required
-                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                ></textarea>
-              </div>
+      <!-- <h4>Emergency Alert</h4>
+      <button
+        onclick="createEmergencyAlert()"
+        class="w-full bg-red-500 text-white p-2 rounded"
+      >
+        Sound Alert
+      </button> -->
+      <br /><br />
+      <h4>Fuel levels</h4>
+      <div id="fuel-logs" class="mt-4">
+        <!-- Fuel logs for each driver will be displayed here -->
+      </div>
+    </aside>
 
-              <div class="flex justify-end gap-2">
-                <button
-                  type="button"
-                  id="cancel-modal"
-                  class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Send
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+    <div id="notificationModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeNotificationModal()">×</span>
+        <h3>Send Notification</h3>
+        <form id="notificationForm">
+          <select id="notification-type" class="w-full mb-2">
+            <option value="information">Information</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+            <option value="success">Success</option>
+          </select>
+          <input
+            type="text"
+            id="notification-title"
+            placeholder="Title"
+            class="w-full mb-2"
+            required
+          />
+          <textarea
+            id="notification-message"
+            placeholder="Message"
+            class="w-full mb-2"
+            required
+          ></textarea>
+          <button
+            type="submit"
+            class="w-full bg-blue-500 text-white p-2 rounded"
+          >
+            Send
+          </button>
+        </form>
       </div>
     </div>
 
     <script>
-      const storageKey = "notificationsData";
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const rightSidebar = document.querySelector(".right-sidebar.resizable");
+        const resizeHandle = document.getElementById("resizeHandle");
 
-      // Function to load notifications from localStorage or use default if none exists
-      function loadNotifications() {
-        const storedNotifications = localStorage.getItem(storageKey);
-        return storedNotifications
-          ? JSON.parse(storedNotifications)
-          : [
-              {
-                id: "1",
-                type: "warning",
-                title: "Bus Delay",
-                message: "Bus 001 is running 10 minutes late on Route 1",
-                timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-                read: false,
-              },
-              {
-                id: "2",
-                type: "info",
-                title: "New Student Added",
-                message:
-                  "New student John wachira has been assigned to Route 2",
-                timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-                read: true,
-              },
-              {
-                id: "3",
-                type: "error",
-                title: "Maintenance Required",
-                message: "Bus 002 requires immediate maintenance check",
-                timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-                read: false,
-              },
-            ];
+        let startX, startWidth;
+
+        // When the user clicks on the resize handle, start the drag process
+        resizeHandle.addEventListener("mousedown", initDrag, false);
+
+        function initDrag(e) {
+          startX = e.clientX;
+          startWidth = parseInt(
+            window.getComputedStyle(rightSidebar).width,
+            10
+          );
+          // Add event listeners for mouse movement and mouse release
+          document.documentElement.addEventListener("mousemove", doDrag, false);
+          document.documentElement.addEventListener("mouseup", stopDrag, false);
+        }
+
+        function doDrag(e) {
+          // Calculate the new width based on mouse movement
+          const newWidth = startWidth + e.clientX - startX;
+          // Ensure the sidebar doesn't go below the min-width or above max-width
+          if (newWidth >= 200 && newWidth <= 500) {
+            rightSidebar.style.width = newWidth + "px";
+          }
+        }
+
+        function stopDrag() {
+          // Remove the drag event listeners when the user releases the mouse
+          document.documentElement.removeEventListener(
+            "mousemove",
+            doDrag,
+            false
+          );
+          document.documentElement.removeEventListener(
+            "mouseup",
+            stopDrag,
+            false
+          );
+        }
+      });
+
+      let notifications = localStorage.getItem("notifications")
+        ? JSON.parse(localStorage.getItem("notifications"))
+        : [];
+      let chats = localStorage.getItem("driverChats")
+        ? JSON.parse(localStorage.getItem("driverChats"))
+        : [];
+      let drivers = localStorage.getItem("drivers")
+        ? JSON.parse(localStorage.getItem("drivers"))
+        : [
+            { name: "Driver 1", fuel: 0 },
+            { name: "Driver 2", fuel: 0 },
+            { name: "Driver 3", fuel: 0 },
+            { name: "Driver 4", fuel: 0 },
+            { name: "Driver 5", fuel: 0 },
+          ];
+
+      function saveToLocalStorage() {
+        localStorage.setItem("notifications", JSON.stringify(notifications));
+        localStorage.setItem("driverChats", JSON.stringify(chats));
+        localStorage.setItem("drivers", JSON.stringify(drivers));
       }
 
-      let notifications = loadNotifications();
-      let filteredNotifications = [...notifications];
-
-      // Save notifications to localStorage
-      function saveNotifications() {
-        localStorage.setItem(storageKey, JSON.stringify(notifications));
+      function loadFromLocalStorage() {
+        if (localStorage.getItem("notifications")) {
+          notifications = JSON.parse(localStorage.getItem("notifications"));
+        }
+        if (localStorage.getItem("driverChats")) {
+          chats = JSON.parse(localStorage.getItem("driverChats"));
+        }
+        if (localStorage.getItem("drivers")) {
+          drivers = JSON.parse(localStorage.getItem("drivers"));
+        }
       }
 
-      // Render the notifications based on the current filter
-      function renderNotifications() {
+      loadFromLocalStorage();
+
+      function renderNotifications(filteredNotifications = notifications) {
         const notificationsList = document.getElementById("notifications-list");
-        const unreadCount = document.getElementById("unread-count");
-
         notificationsList.innerHTML = "";
         filteredNotifications.forEach((notification) => {
-          const notificationCard = document.createElement("div");
-          notificationCard.classList.add(
-            "notification-card",
-            "bg-white",
-            "rounded-lg",
-            "shadow",
-            "p-4"
-          );
-          if (!notification.read) notificationCard.classList.add("new");
-
-          notificationCard.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="flex gap-3">
-                        <span class="lucide lucide-${
-                          notification.type
-                        } w-5 h-5"></span>
-                        <div>
-                            <h3 class="font-medium">${notification.title}</h3>
-                            <p class="text-sm text-gray-600 mt-1">${
-                              notification.message
-                            }</p>
-                            <p class="text-xs text-gray-400 mt-2">${new Date(
-                              notification.timestamp
-                            ).toLocaleString()}</p>
-                        </div>
+          const card = document.createElement("div");
+          card.className = `notification-card ${
+            !notification.read ? "new" : ""
+          }`;
+          card.innerHTML = `
+                    <div>
+                        <h3>${notification.title}</h3>
+                        <p>${notification.message}</p>
+                        <small>${new Date(
+                          notification.timestamp
+                        ).toLocaleString()}</small>
                     </div>
-                    <div class="flex gap-2">
-                        ${
-                          !notification.read
-                            ? `<button class="text-blue-600 hover:text-blue-800 text-sm" onclick="markAsRead('${notification.id}')">Mark as read</button>`
-                            : ""
-                        }
-                        <button class="text-gray-400 hover:text-gray-600" onclick="deleteNotification('${
-                          notification.id
-                        }')">
-                            <span class="lucide lucide-x w-4 h-4"></span>
-                        </button>
-                    </div>
-                </div>
-            `;
-          notificationsList.appendChild(notificationCard);
+                    <button onclick="markAsRead('${
+                      notification.id
+                    }')" class="text-blue-500 ${
+            notification.read ? "hidden" : ""
+          }">Mark as read</button>
+                `;
+          notificationsList.appendChild(card);
         });
-
-        unreadCount.innerText = `${
-          filteredNotifications.filter((n) => !n.read).length
-        } unread notifications`;
       }
 
-      // Mark a notification as read
-      function markAsRead(id) {
-        const notification = notifications.find((n) => n.id === id);
-        if (notification) {
-          notification.read = true;
-          saveNotifications(); // Save after changing state
-          renderNotifications();
-        }
+      function openNotificationModal() {
+        document.getElementById("notificationModal").style.display = "block";
       }
 
-      // Delete a notification
-      function deleteNotification(id) {
-        const index = notifications.findIndex((n) => n.id === id);
-        if (index !== -1) {
-          notifications.splice(index, 1);
-          saveNotifications(); // Save after deleting
-          renderNotifications();
-        }
+      function closeNotificationModal() {
+        document.getElementById("notificationModal").style.display = "none";
       }
 
-      // Handle notification form submission
       document
-        .getElementById("send-notification-form")
-        .addEventListener("submit", (e) => {
+        .getElementById("notificationForm")
+        .addEventListener("submit", function (e) {
           e.preventDefault();
-
           const type = document.getElementById("notification-type").value;
           const title = document.getElementById("notification-title").value;
           const message = document.getElementById("notification-message").value;
 
-          // Create a new notification object
-          const newNotification = {
-            id: `${Date.now()}`,
-            type,
-            title,
-            message,
+          notifications.unshift({
+            id: Date.now().toString(),
+            type: type,
+            title: title,
+            message: message,
             timestamp: new Date().toISOString(),
             read: false,
-          };
+          });
 
-          // Add the new notification to the list
-          notifications.unshift(newNotification); // Add it to the top of the list
-          saveNotifications(); // Save after adding new notification
-
-          // Re-render the notifications list
-          filteredNotifications = [...notifications]; // Ensure the filter is updated
+          saveToLocalStorage();
           renderNotifications();
-
-          // Close the modal
-          document
-            .getElementById("send-notification-modal")
-            .classList.add("hidden");
+          closeNotificationModal();
+          this.reset(); // Reset form after submission
         });
 
-      // Handle closing the modal
-      document.getElementById("close-modal").addEventListener("click", () => {
-        document
-          .getElementById("send-notification-modal")
-          .classList.add("hidden");
-      });
+      function markAsRead(id) {
+        const notification = notifications.find((n) => n.id === id);
+        if (notification) {
+          notification.read = true;
+          saveToLocalStorage();
+          renderNotifications(); // Re-render to update the UI
+        }
+      }
 
-      document.getElementById("cancel-modal").addEventListener("click", () => {
-        document
-          .getElementById("send-notification-modal")
-          .classList.add("hidden");
-      });
+      function filterNotifications() {
+        const filterValue = document.getElementById(
+          "notification-filter"
+        ).value;
+        let filteredNotifications = [];
+        if (filterValue === "unread") {
+          filteredNotifications = notifications.filter((n) => !n.read);
+        } else if (filterValue === "read") {
+          filteredNotifications = notifications.filter((n) => n.read);
+        } else {
+          filteredNotifications = notifications;
+        }
+        renderNotifications(filteredNotifications);
+      }
 
-      // Handle filter change
-      document
-        .getElementById("notification-filter")
-        .addEventListener("change", (e) => {
-          const filterValue = e.target.value;
-          if (filterValue === "unread") {
-            filteredNotifications = notifications.filter((n) => !n.read);
-          } else {
-            filteredNotifications = [...notifications];
+      function renderChats() {
+        const chatContainer = document.getElementById("chat-container");
+        chatContainer.innerHTML = "";
+        chats.forEach((chat) => {
+          const messageDiv = document.createElement("div");
+          messageDiv.classList.add(
+            "chat-message",
+            chat.sender === "You" ? "sent" : "received"
+          );
+          if (chat.sender !== "You") {
+            messageDiv.style.backgroundColor = getColorForDriver(chat.sender);
           }
+          messageDiv.textContent = `${chat.sender}: ${chat.message}`;
+          chatContainer.appendChild(messageDiv);
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      function getColorForDriver(driver) {
+        const colors = ["#ff9999", "#99ff99", "#9999ff", "#ffff99", "#ff99ff"];
+        const index = drivers.findIndex((d) => d.name === driver);
+        return colors[index % colors.length];
+      }
+
+      function sendMessage() {
+        const selectedDriver = document.getElementById("driver-select").value;
+        const input = document.getElementById("chat-message-input");
+        const message = input.value.trim();
+        if (message && selectedDriver) {
+          chats.push({
+            sender: selectedDriver,
+            message: message,
+            timestamp: new Date().toISOString(),
+          });
+          input.value = "";
+          saveToLocalStorage();
+          renderChats();
+        }
+      }
+
+      function logFuelLevel() {
+        const fuelLevel = document.getElementById("fuel-level").value;
+        const driverName = document.getElementById("driver-fuel-select").value;
+
+        if (fuelLevel && driverName) {
+          const driver = drivers.find((d) => d.name === driverName);
+          if (driver) {
+            // Directly set the fuel level as provided by the user, ensuring it's within the range 0-100
+            driver.fuel = parseInt(fuelLevel);
+            saveToLocalStorage();
+            updateFuelDisplay();
+            // Clear the input field after logging
+            document.getElementById("fuel-level").value = "";
+          }
+        } else {
+          alert("Please select a driver and enter a fuel level.");
+        }
+      }
+      function updateFuelDisplay() {
+        const fuelLogs = document.getElementById("fuel-logs");
+        fuelLogs.innerHTML = ""; // Clear previous logs
+        drivers.forEach((driver) => {
+          const fuelBar = document.createElement("div");
+          fuelBar.className = "fuel-bar";
+          const fuelLevel = document.createElement("div");
+          fuelLevel.className = "fuel-level";
+          fuelLevel.style.width = `${driver.fuel}%`;
+          fuelLevel.style.backgroundColor = getColorForDriver(driver.name);
+          fuelBar.appendChild(fuelLevel);
+          const fuelText = document.createElement("p");
+          fuelText.textContent = `${driver.name}: ${driver.fuel}%`;
+          fuelLogs.appendChild(fuelText);
+          fuelLogs.appendChild(fuelBar);
+        });
+      }
+
+      function reportMaintenance() {
+        const issue = document.getElementById("maintenance-issue").value;
+        const driverName = document.getElementById("driver-select").value;
+        if (issue && driverName) {
+          notifications.unshift({
+            id: Date.now().toString(),
+            type: "maintenance",
+            title: "Maintenance Report",
+            message: `${driverName}: ${issue}`,
+            timestamp: new Date().toISOString(),
+            read: false,
+          });
+          document.getElementById("maintenance-issue").value = ""; // Clear input after reporting
+          saveToLocalStorage();
           renderNotifications();
-        });
+        }
+      }
 
-      // Show modal when sending notification
-      document
-        .getElementById("send-notification-btn")
-        .addEventListener("click", () => {
-          document
-            .getElementById("send-notification-modal")
-            .classList.remove("hidden");
-        });
+      function createEmergencyAlert() {
+        const driverName = document.getElementById("driver-select").value;
+        if (driverName) {
+          notifications.unshift({
+            id: Date.now().toString(),
+            type: "emergency",
+            title: "Emergency Alert",
+            message: `${driverName} has sounded an emergency warning!`,
+            timestamp: new Date().toISOString(),
+            read: false,
+          });
+          saveToLocalStorage();
+          renderNotifications();
+        }
+      }
 
-      // Initial rendering of notifications
       renderNotifications();
+      renderChats();
+      updateFuelDisplay();
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
