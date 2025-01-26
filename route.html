@@ -224,7 +224,19 @@
   </script>
       
       </div>
-
+<script>
+    document.getElementById('viewSelect').addEventListener('change', function() {
+      const selectedValue = this.value;
+      
+      if (selectedValue === 'admin') {
+        window.location.href = 'index1.html';  // Replace with your actual Admin page link
+      } else if (selectedValue === 'driver') {
+        window.location.href = 'driver.html';  // Replace with your actual Driver page link
+      } else if (selectedValue === 'parent') {
+        window.location.href = 'parent.html';  // Replace with your actual Parent page link
+      }
+    });
+  </script>
   <div class="container mt-5">
     <h2 class="mb-4 text-center">Add a Stop</h2>
     <form  id="addStopForm">
@@ -636,21 +648,29 @@ function updateRoute(route) {
 }
 
 
+let routePolyline;
+
 function animateBus(path) {
   if (busInterval) {
-    clearInterval(busInterval); // Stop any previous animation
+    clearInterval(busInterval);
   }
 
   routeIndex = 0;
   busMarker.setPosition(path[routeIndex]);
 
-  const busMovementTime = 1000;  // 1000 ms for bus movement between stops
-  const stopUpdateTime = 200000;   // 3000 ms for stop update delay
+  const busMovementTime = 1000;  
+  const stopUpdateTime = 200000;  // Adjust this value as needed
+
+  // Draw the route initially
+  drawRoute(path);
 
   busInterval = setInterval(function () {
     if (routeIndex < path.length - 1) {
       routeIndex++;
       busMarker.setPosition(path[routeIndex]);
+
+      // Update route color
+      updateRouteColor(path, path[routeIndex]);
 
       const currentStop = routes[selectedRoute][routeIndex];
       const stopElement = $('#route-stops li').eq(routeIndex);
@@ -664,10 +684,57 @@ function animateBus(path) {
       }, stopUpdateTime);
 
     } else {
-      clearInterval(busInterval); // Stop animation when route ends
+      clearInterval(busInterval);
       $('#route-status').text('Route Status: Completed');
     }
-  }, busMovementTime); // Move bus every 'busMovementTime' ms
+  }, busMovementTime);
+}
+
+function drawRoute(path) {
+  if (routePolyline) routePolyline.setMap(null);
+
+  routePolyline = new google.maps.Polyline({
+    path: path,
+    strokeColor: "#0000FF", // Blue for the entire route initially
+    strokeOpacity: 0.8,
+    strokeWeight: 3,
+    map: map
+  });
+}
+
+function updateRouteColor(path, currentPosition) {
+  if (routePolyline) {
+    const polylinePath = routePolyline.getPath();
+    const newPath = new google.maps.MVCArray();
+
+    let closestIndex = 0;
+    let minDistance = Infinity;
+    for (let i = 0; i < path.length; i++) {
+      let distance = google.maps.geometry.spherical.computeDistanceBetween(path[i], currentPosition);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = i;
+      }
+    }
+
+    // Update the path of the polyline with new segments and colors
+    for (let i = 0; i < path.length; i++) {
+      newPath.push(path[i]);
+      
+      // Change color based on if the segment is behind or ahead of the bus
+      if (i <= closestIndex) {
+        routePolyline.setOptions({
+          strokeColor: i === closestIndex ? "#0000FF" : "#AAAAAA", // Gray for traveled part, keep blue for current position
+          path: newPath
+        });
+      } else {
+        routePolyline.setOptions({
+          strokeColor: "#0000FF", // Blue for ahead
+          path: newPath
+        });
+      }
+    }
+  }
 }
 
 

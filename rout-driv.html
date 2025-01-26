@@ -170,6 +170,14 @@
           min-height: 200px; /* Further adjust map height for very small screens */
         }
       }
+      .completed {
+        color: #28a745; /* Green for completed stops */
+      }
+    
+      .incomplete {
+        color: #dc3545; /* Red for incomplete stops */
+      }
+    
     </style>
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -221,8 +229,8 @@
           <option value="parent">Parent View</option></select
         ><br />-->
 
-        <label for="routeSelect">Select Route:</label>
-        <select class="form-control" id="routeSelect">
+        <label for="routeSelect" style="display:none;">Select Route:</label>
+        <select style="display:none;" class="form-control" id="routeSelect">
           <option value="route1">Route 1</option>
           <option value="route2">Route 2</option>
           <option value="route3">Route 3</option>
@@ -331,14 +339,10 @@
           "Number: " + details.busNumber;
       }
 
-      const stopsRoute1 = [
+      const stopsRoute2 = [
         { lat: -1.22419, lng: 36.9176, title: "Mount Laverna School" },
         { lat: -1.17793, lng: 36.98324, title: "New Paleah Wholesalers Ltd" },
-        {
-          lat: -1.19513,
-          lng: 36.95832,
-          title: "MASTER BROWN INTERNATIONAL INSTITUTE",
-        },
+        {lat: -1.19513,lng: 36.95832,title: "MASTER BROWN INTERNATIONAL INSTITUTE",},
         { lat: -1.19392, lng: 36.93817, title: "Kahawa Sukari Baptist Church" },
         { lat: -1.18888, lng: 36.93147, title: "Ceptacore Systems Limited" },
         { lat: -1.16824, lng: 36.98919, title: "Springfield Park" },
@@ -350,13 +354,9 @@
         { lat: -1.22419, lng: 36.9176, title: "Mount Laverna School" }, // Same starting point for Route 1
       ];
 
-      const stopsRoute2 = [
+      const stopsRoute1 = [
         { lat: -1.22419, lng: 36.9176, title: "Mount Laverna School" },
-        {
-          lat: -1.218972,
-          lng: 36.923028,
-          title: "Kevis Beauty Salon and Barbershop",
-        },
+        {lat: -1.218972,lng: 36.923028,title: "Kevis Beauty Salon and Barbershop",},
         { lat: -1.2195, lng: 36.924278, title: "Jeremy Entertainments" },
         { lat: -1.220944, lng: 36.923417, title: "Carlcare Service Ltd" },
         { lat: -1.219889, lng: 36.926028, title: "Riverbank Hotel" },
@@ -372,41 +372,18 @@
         { lat: -1.22419, lng: 36.9176, title: "Mount Laverna School" },
         { lat: -1.2265, lng: 36.916972, title: "Transline Galaxy - Kasarani" },
         { lat: -1.225611, lng: 36.919361, title: "PCEA Ciiko Church" },
-        {
-          lat: -1.227083,
-          lng: 36.918667,
-          title: "Kasarani Hunters Genesis 2nd Street",
-        },
+        {lat: -1.227083,lng: 36.918667,
+          title: "Kasarani Hunters Genesis 2nd Street", },
         { lat: -1.227417, lng: 36.922139, title: "Santon Chemist" },
-        {
-          lat: -1.225611,
-          lng: 36.923278,
-          title: "ACK Good Samaritan Church Ciiko",
-        },
-        {
-          lat: -1.229556,
-          lng: 36.921722,
-          title: "Mwiki Road Hospital & Pharmacy",
-        },
+        {lat: -1.225611,lng: 36.923278,title: "ACK Good Samaritan Church Ciiko",},
+        {lat: -1.229556,lng: 36.921722,title: "Mwiki Road Hospital & Pharmacy",},
         { lat: -1.229361, lng: 36.924444, title: "Anesmar Flats" },
-        {
-          lat: -1.227611,
-          lng: 36.926389,
-          title: "Claycity Business Center - Kasarani",
-        },
+        {lat: -1.227611,lng: 36.926389,title: "Claycity Business Center - Kasarani",},
         { lat: -1.227944, lng: 36.924611, title: "Rware Flats" },
         { lat: -1.229361, lng: 36.927194, title: "Vibramatt Supermarket" },
         { lat: -1.225778, lng: 36.929, title: "LPG Gas Authorized Dealer" },
-        {
-          lat: -1.226167,
-          lng: 36.932833,
-          title: "13th Street - Deliverance Road",
-        },
-        {
-          lat: -1.233028,
-          lng: 36.930306,
-          title: "Deliverance Church Kasarani Mwiki",
-        },
+        {lat: -1.226167,lng: 36.932833,title: "13th Street - Deliverance Road", },
+        {lat: -1.233028,lng: 36.930306,title: "Deliverance Church Kasarani Mwiki",},
         { lat: -1.22419, lng: 36.9176, title: "Mount Laverna School" },
       ];
 
@@ -415,19 +392,11 @@
         { lat: -1.21744, lng: 36.91133, title: "Beatriz La Roca Apartments" },
         { lat: -1.21892, lng: 36.91461, title: "Mama Fauzia Children's Home" },
         { lat: -1.21961, lng: 36.91267, title: "Rosapharm Industrial Park" },
-        {
-          lat: -1.21894,
-          lng: 36.91144,
-          title: "Mwangi Kariba Hardware And Tools",
-        },
+        {lat: -1.21894,lng: 36.91144,title: "Mwangi Kariba Hardware And Tools",},
         { lat: -1.22303, lng: 36.91192, title: "Maternity Stage" },
         { lat: -1.22103, lng: 36.90536, title: "Warren Concrete Ltd" },
         { lat: -1.21861, lng: 36.90817, title: "Olalem Chemist" },
-        {
-          lat: -1.21706,
-          lng: 36.90533,
-          title: "Arise Apartment, Seasons Kasarani",
-        },
+        {lat: -1.21706,lng: 36.90533,title: "Arise Apartment, Seasons Kasarani",},
         { lat: -1.21689, lng: 36.91025, title: "Millenium Heights" },
         { lat: -1.21497, lng: 36.90892, title: "The Bliss Place" },
         { lat: -1.21519, lng: 36.90719, title: "Alpine Chalet Kasarani" },
@@ -439,23 +408,11 @@
         { lat: -1.223487, lng: 36.902212, title: "Kasarani Chief's Camp" },
         { lat: -1.22053, lng: 36.90278, title: "Kasarani Health Centre" },
         { lat: -1.22206, lng: 36.89928, title: "St. Marys Sportsview Academy" },
-        {
-          lat: -1.21797,
-          lng: 36.89953,
-          title: "Kassmatt Supermarket - Kasarani",
-        },
-        {
-          lat: -1.22089,
-          lng: 36.89647,
-          title: "ENVIRONMENTAL LIAISON CENTRE INTERNATIONAL",
-        },
+        {lat: -1.21797,lng: 36.89953,title: "Kassmatt Supermarket - Kasarani",},
+        {lat: -1.22089,lng: 36.89647,title: "ENVIRONMENTAL LIAISON CENTRE INTERNATIONAL",},
         { lat: -1.22431, lng: 36.89489, title: "Gifts By Wiggi" },
         { lat: -1.22164, lng: 36.89522, title: "HIVE CAR TINTING" },
-        {
-          lat: -1.21992,
-          lng: 36.89419,
-          title: "KARIUKI MURIUKI & COMPANY ADVOCATES",
-        },
+        {lat: -1.21992,lng: 36.89419,title: "KARIUKI MURIUKI & COMPANY ADVOCATES",},
         { lat: -1.2195, lng: 36.88208, title: "Topace Studio Apartments" },
         { lat: -1.21933, lng: 36.88653, title: "Roybahn Heights Apartments" },
         { lat: -1.21758, lng: 36.88933, title: "Fleek Car Accessories" },
@@ -484,10 +441,68 @@
         directionsRenderer = new google.maps.DirectionsRenderer({
           suppressMarkers: true, // Suppress default markers
         });
-        map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 13,
-          center: { lat: -1.22419, lng: 36.9176 },
+
+        // Declare the marker variable globally
+// Declare the marker and infoWindow variables globally
+let marker;
+let infoWindow = new google.maps.InfoWindow({
+  content: "Driver1", // The label you want to display when the marker is clicked
+});
+
+map = new google.maps.Map(document.getElementById("map"), {
+  zoom: 13,
+  center: { lat: -1.22419, lng: 36.9176 }, // Default center before we get the real location
+});
+
+// Check if Geolocation is supported
+if (navigator.geolocation) {
+  // Watch position for continuous location updates
+  navigator.geolocation.watchPosition(
+    (position) => {
+      const userLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+
+      // Save the location in localStorage
+      localStorage.setItem('userLocation', JSON.stringify(userLocation));
+
+      // Center the map to the current position
+      map.setCenter(userLocation);
+
+      // Create or update the marker
+      if (!marker) {
+        marker = new google.maps.Marker({
+          position: userLocation,
+          map: map,
+          title: "Driver1", // Set the marker's title to "Driver1"
         });
+
+        // Add a click listener to the marker to show the info window
+        marker.addListener("click", () => {
+          infoWindow.open(map, marker);
+        });
+
+      } else {
+        marker.setPosition(userLocation);
+        marker.setAnimation(google.maps.Animation.BOUNCE); // Optional: Bouncing effect when moving
+        marker.setTitle("Driver1"); // Update the title to "Driver1" if needed
+      }
+    },
+    (error) => {
+      console.error("Error getting location: ", error);
+    },
+    {
+      enableHighAccuracy: true, // Use GPS if available
+      timeout: 5000, // Timeout after 5 seconds
+      maximumAge: 0, // Prevent using cached location
+    }
+  );
+} else {
+  alert("Geolocation is not supported by this browser.");
+}
+
+        
 
         directionsRenderer.setMap(map);
 

@@ -170,6 +170,14 @@
           min-height: 200px; /* Further adjust map height for very small screens */
         }
       }
+      .completed {
+        color: #28a745; /* Green for completed stops */
+      }
+    
+      .incomplete {
+        color: #dc3545; /* Red for incomplete stops */
+      }
+    
     </style>
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -186,7 +194,7 @@
       <h2>BusTracker</h2>
       <!-- <a href="bus.html"><i class="fas fa-bus"></i> Buses</a> -->
       <a href="stud-par.html"><i class="fas fa-users"></i> Students</a>
-      <a href="parent.html"><i class="fas fa-route"></i> Routes</a>
+      <a href="parent.html"><i class="fas fa-route"></i> Route</a>
       <a href="parent-notification.html"><i class="fas fa-bell"></i> Notifications</a>
       <a href="index.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
       <!-- <a href="#"><i class="fas fa-cogs"></i> Settings</a> -->
@@ -222,8 +230,8 @@
   <option value="route3">Route 3</option> -->
 
 </select><br>
-        <label for="routeSelect">Select Route:</label>
-        <select class="form-control" id="routeSelect">
+        <label style="display:none;" for="routeSelect">Select Route:</label>
+        <select style="display:none;" class="form-control" id="routeSelect">
           <option value="route1">Route 1</option>
           <option value="route2">Route 2</option>
           <option value="route3">Route 3</option>
@@ -304,7 +312,7 @@ function updateDriverDetails(route) {
 }
 
 
-const stopsRoute1 = [
+const stopsRoute2 = [
   { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
   { lat: -1.17793, lng: 36.98324, title: 'New Paleah Wholesalers Ltd' },
   { lat: -1.19513, lng: 36.95832, title: 'MASTER BROWN INTERNATIONAL INSTITUTE' },
@@ -319,7 +327,7 @@ const stopsRoute1 = [
   { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' } // Same starting point for Route 1
 ];
 
-const stopsRoute2 = [
+const stopsRoute1 = [
   { lat: -1.22419, lng: 36.9176, title: 'Mount Laverna School' },
   { lat: -1.218972, lng: 36.923028, title: 'Kevis Beauty Salon and Barbershop' },
   { lat: -1.219500, lng: 36.924278, title: 'Jeremy Entertainments' },
@@ -410,10 +418,62 @@ function initMap() {
       suppressMarkers: true // Suppress default markers
     }
   );
-  map = new google.maps.Map(document.getElementById('map'), {
+
+  
+  // Declare the marker and infoWindow variables globally
+// Declare the marker and infoWindow variables globally
+let marker;
+let infoWindow = new google.maps.InfoWindow({
+    content: "Driver1", // The label you want to display when the marker is clicked
+});
+
+const map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
-    center: { lat: -1.22419, lng: 36.9176 }
-  });
+    center: { lat: -1.22419, lng: 36.9176 } // Default center in case location isn't available
+});
+
+// Function to update the marker with the real-time location
+function updateDriverLocation() {
+    // Retrieve the saved location from localStorage
+    const savedLocation = JSON.parse(localStorage.getItem('userLocation'));
+
+    if (savedLocation) {
+        const driverLocation = {
+            lat: savedLocation.lat,
+            lng: savedLocation.lng,
+        };
+
+        // Center the map on the driver's real-time location
+        map.setCenter(driverLocation);
+
+        // Create or update the marker
+        if (!marker) {
+            marker = new google.maps.Marker({
+                position: driverLocation,
+                map: map,
+                title: "Driver1",
+                animation: google.maps.Animation.DROP // Adds a smooth drop animation when the marker is created
+            });
+
+            // Add a click listener to the marker to show the info window
+            marker.addListener("click", () => {
+                infoWindow.open(map, marker);
+            });
+        } else {
+            // Animate the marker to the new location smoothly
+            marker.setPosition(driverLocation);
+            marker.setAnimation(google.maps.Animation.BOUNCE); // Optional: Bouncing effect when moving
+        }
+    } else {
+        console.log('No real-time location found for Driver1.');
+    }
+}
+
+// Call the update function every few seconds to simulate real-time updates
+setInterval(updateDriverLocation, 3000); // Update every 3 seconds
+
+
+
 
   directionsRenderer.setMap(map);
   
