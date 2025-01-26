@@ -1,0 +1,432 @@
+<!doctype html>
+<!--
+ @license
+ Copyright 2019 Google LLC. All Rights Reserved.
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Layer</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+    }
+  
+    /* Sidebar styles */
+    .sidebar {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #f8f9fa;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 2; /* Ensure it stays on top of the content */
+    }
+  
+    .sidebar a {
+      color: #333;
+      font-size: 18px;
+      text-decoration: none;
+      padding: 10px;
+      display: block;
+    }
+  
+    .sidebar a:hover {
+      background-color: #007bff;
+      color: #fff;
+    }
+  
+    /* Content area */
+    .content {
+      margin-left: 250px; /* Adjusted to match the width of the left sidebar */
+      margin-right: 300px; /* Adjusted to match the width of the right sidebar */
+      padding: 20px;
+      height: calc(100vh - 40px);
+      overflow: auto;
+    }
+  
+    /* Right Sidebar for Route Details */
+    .route-details-sidebar {
+      height: 100vh;
+      width: 300px;
+      position: fixed;
+      top: 0;
+      right: 0;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 1px solid #ddd;
+      overflow-y: auto;
+      z-index: 2; /* Ensure it stays on top of the content */
+    }
+  
+    .route-details h4 {
+      font-weight: bold;
+    }
+  
+    .route-status {
+      background-color: #e5f8e8;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      color: #28a745;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  
+    .route-stops {
+      list-style: none;
+      padding-left: 0;
+    }
+  
+    .route-stops li {
+      padding: 5px 0;
+    }
+  
+    /* Stop card styling */
+    .stop-card {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+  
+    /* Map container */
+    #map {
+      height: 100%;
+      width: 100%;
+      min-height: 500px;
+    }
+  
+    /* Additional styles for the form */
+    .form-group select.form-select-sm {
+      width: 200px;
+      display: inline-block;
+    }
+  
+    .form-group label {
+      font-weight: bold;
+    }
+  
+    button[type="submit"] {
+      width: 100%;
+    }
+  
+    /* Driver and Bus Details in Right Sidebar */
+    #driver-details, #bus-details {
+      margin-top: 20px;
+    }
+  
+    #driver-details h4, #bus-details h4 {
+      font-weight: bold;
+    }
+  
+    /* Media queries for responsiveness */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding: 10px 0;
+        white-space: nowrap;
+        overflow-x: auto;
+      }
+  
+      .sidebar a {
+        display: inline-block;
+        font-size: 14px;
+        margin: 0 5px;
+        padding: 5px 10px;
+        white-space: nowrap;
+      }
+  
+      .content {
+        margin-left: 0; /* Reset margins for smaller screens */
+        margin-right: 0;
+        padding-top: 0;
+      }
+  
+      .route-details-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-left: none;
+        border-top: 1px solid #ddd;
+        margin-top: -20px; /* Move up to reduce white space */
+      }
+  
+      #map {
+        min-height: 300px; /* Adjust map height for smaller screens */
+      }
+    }
+  
+    @media (max-width: 576px) {
+      .sidebar a {
+        font-size: 12px;
+        margin: 0 3px;
+        padding: 3px 5px;
+      }
+  
+      #map {
+        min-height: 200px; /* Further adjust map height for very small screens */
+      }
+    }
+    .completed {
+      color: #28a745; /* Green for completed stops */
+    }
+  
+    .incomplete {
+      color: #dc3545; /* Red for incomplete stops */
+    }
+  
+  </style>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script type="module" src="./index.ts"></script>
+</head>
+<body>
+  <!-- Left Sidebar -->
+  <div class="sidebar">
+    <h2>BusTracker</h2>
+    <a href="bus.html"><i class="fas fa-bus"></i> Buses</a>
+    <a href="student.html"><i class="fas fa-users"></i> Students</a>
+    <a href="route.html"><i class="fas fa-route"></i> Routes</a>
+    <a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a>
+    <a href="settings.html"><i class="fas fa-cogs"></i> Settings</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Route Management</h2>
+       <!--
+      <select id="viewSelect" class="form-select form-select-sm">
+        <option value="#">Select View</option>
+        <option value="admin">Admin View</option>
+        <option value="driver">Driver View</option>
+        <option value="parent">Parent View</option>
+      </select><br>-->
+      <div class="d-flex align-items-center">
+        <img src="https://t3.ftcdn.net/jpg/00/07/32/48/360_F_7324855_mx4CEBWTr81XLOrlQccCROtP2uNR7xbk.jpg" width="40px" height="40px" alt="Admin User" class="rounded-circle">
+        <div class="ml-2">
+          <p class="mb-0">Admin View</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById('viewSelect').addEventListener('change', function() {
+        const selectedValue = this.value;
+        
+        if (selectedValue === 'admin') {
+          window.location.href = 'index1.html';
+        } else if (selectedValue === 'driver') {
+          window.location.href = 'driver.html';
+        } else if (selectedValue === 'parent') {
+          window.location.href = 'parent.html';
+        }
+      });
+    </script>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+  </div>
+
+  <!-- Right Sidebar for Route Details -->
+  <div class="route-details-sidebar" id="route-details-sidebar">
+    <!-- Route 1 Details -->
+    <div class="route-details">
+      <h4>Route 1 Details</h4>
+      <div class="route-status">Picking up Students</div>
+      <p><strong>Estimated journey time:</strong> 45 mins</p>
+      <ul class="list-unstyled">
+        <li><i class="fas fa-map-marker-alt"></i> Mount Laverna School <span class="eta">ETA: 30 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> New Paleah Wholesalers Ltd <span class="eta">ETA: 15 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> MASTER BROWN INTERNATIONAL INSTITUTE <span class="eta">ETA: 10 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Kahawa Sukari Baptist Church <span class="eta">ETA: 20 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Ceptacore Systems Limited <span class="eta">ETA: 15 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Springfield Park <span class="eta">ETA: 25 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Ruda Education Center <span class="eta">ETA: 12 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Shell - Kihunguro <span class="eta">ETA: 18 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Kijana Msafi Caterers <span class="eta">ETA: 14 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Sara kwa booster <span class="eta">ETA: 16 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Horeb Ministries Githurai 45 <span class="eta">ETA: 22 mins</span></li>
+                <li><i class="fas fa-map-marker-alt"></i> Mount Laverna School <span class="eta">ETA: 30 mins</span></li>
+      </ul>
+
+      <!-- Driver Details -->
+      <div class="driver-details">
+        <h5>Driver Details</h5>
+        <p><strong>Name:</strong> John</p>
+        <p><strong>Phone:</strong> +254701234567</p>
+        <p><strong>Email:</strong> john@email.com</p>
+      </div>
+
+      <!-- Bus Details -->
+      <div class="bus-details">
+        <h5>Bus Details</h5>
+        <p><strong>Bus Number:</strong> 123ABC</p>
+        <p><strong>Capacity:</strong> 30 Students</p>
+        <p><strong>Bus Type:</strong> Coach</p>
+      </div>
+    </div>
+
+    <!-- Route 2 Details -->
+    <div class="route-details">
+      <h4>Route 2 Details</h4>
+      <div class="route-status">Picking up Students</div>
+      <p><strong>Estimated journey time:</strong> 60 mins</p>
+      <ul class="list-unstyled">
+        <li><i class="fas fa-map-marker-alt"></i> Kevis Beauty Salon <span class="eta">ETA: 10 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Jeremy Entertainments <span class="eta">ETA: 20 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Carlcare Service Ltd <span class="eta">ETA: 15 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Riverbank Hotel <span class="eta">ETA: 25 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Gigiri Towers Apartment <span class="eta">ETA: 18 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Wema Flats <span class="eta">ETA: 12 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Dove Apartments <span class="eta">ETA: 20 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Zion Temple Kasarani <span class="eta">ETA: 30 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Kibukahs Apartments <span class="eta">ETA: 15 mins</span></li>
+                <li><i class="fas fa-map-marker-alt"></i> Mount Laverna School <span class="eta">ETA: 30 mins</span></li>
+
+      </ul>
+
+      <!-- Driver Details -->
+      <div class="driver-details">
+        <h5>Driver Details</h5>
+        <p><strong>Name:</strong> Jane</p>
+        <p><strong>Phone:</strong> +254709876543</p>
+        <p><strong>Email:</strong> jane@email.com</p>
+      </div>
+
+      <!-- Bus Details -->
+      <div class="bus-details">
+        <h5>Bus Details</h5>
+        <p><strong>Bus Number:</strong> 456DEF</p>
+        <p><strong>Capacity:</strong> 40 Students</p>
+        <p><strong>Bus Type:</strong> Minibus</p>
+      </div>
+    </div>
+
+    <!-- Route 3 Details -->
+    <div class="route-details">
+      <h4>Route 3 Details</h4>
+      <div class="route-status">Picking up Students</div>
+      <p><strong>Estimated journey time:</strong> 75 mins</p>
+      <ul class="list-unstyled">
+ <li><i class="fas fa-map-marker-alt"></i> Transline Galaxy <span class="eta">ETA: 10 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> PCEA Ciiko Church <span class="eta">ETA: 15 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Kasarani Hunters <span class="eta">ETA: 20 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Santon Chemist <span class="eta">ETA: 30 mins</span></li>
+        <li><i class="fas fa-map-marker-alt"></i> Deliverance Church <span class="eta">ETA: 25 mins</span></li>
+                <li><i class="fas fa-map-marker-alt"></i> Mount Laverna School <span class="eta">ETA: 30 mins</span></li>
+      </ul>
+
+      <!-- Driver Details -->
+      <div class="driver-details">
+        <h5>Driver Details</h5>
+        <p><strong>Name:</strong> Alice</p>
+        <p><strong>Phone:</strong> +254701234888</p>
+        <p><strong>Email:</strong> alice@email.com</p>
+      </div>
+
+      <!-- Bus Details -->
+      <div class="bus-details">
+        <h5>Bus Details</h5>
+        <p><strong>Bus Number:</strong> 789GHI</p>
+        <p><strong>Capacity:</strong> 50 Students</p>
+        <p><strong>Bus Type:</strong>Scania</p>
+      </div>
+    </div>
+    <!-- Add this before the closing tag of the route-details-sidebar div -->
+<div class="route-details">
+  <h4>Route 4 Details</h4>
+  <div class="route-status">Picking up Students</div>
+  <p><strong>Estimated journey time:</strong> 50 mins</p>
+  <ul class="list-unstyled">
+    <li><i class="fas fa-map-marker-alt"></i> Beatriz La Roca Apartments <span class="eta">ETA: 10 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Mama Fauzia Children's Home <span class="eta">ETA: 15 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Rosapharm Industrial Park <span class="eta">ETA: 20 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Mwangi Kariba Hardware And Tools <span class="eta">ETA: 25 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Maternity Stage <span class="eta">ETA: 30 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Warren Concrete Ltd <span class="eta">ETA: 35 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Olalem Chemist <span class="eta">ETA: 40 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Arise Apartment, Seasons Kasarani <span class="eta">ETA: 45 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Millenium Heights <span class="eta">ETA: 50 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> The Bliss Place <span class="eta">ETA: 55 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Alpine Chalet Kasarani <span class="eta">ETA: 60 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Mount Laverna School <span class="eta">ETA: 30 mins</span></li>
+  </ul>
+
+  <!-- Driver Details -->
+  <div class="driver-details">
+    <h5>Driver Details</h5>
+    <p><strong>Name:</strong> Ben</p>
+    <p><strong>Phone:</strong> +254705555555</p>
+    <p><strong>Email:</strong> ben@email.com</p>
+  </div>
+
+  <!-- Bus Details -->
+  <div class="bus-details">
+    <h5>Bus Details</h5>
+    <p><strong>Bus Number:</strong> 101JKL</p>
+    <p><strong>Capacity:</strong> 35 Students</p>
+    <p><strong>Bus Type:</strong> Van</p>
+  </div>
+</div>
+<!-- Add this before the closing tag of the route-details-sidebar div -->
+<div class="route-details">
+  <h4>Route 5 Details</h4>
+  <div class="route-status">Picking up Students</div>
+  <p><strong>Estimated journey time:</strong> 60 mins</p>
+  <ul class="list-unstyled">
+    <li><i class="fas fa-map-marker-alt"></i> Kasarani Chief's Camp <span class="eta">ETA: 10 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Kasarani Health Centre <span class="eta">ETA: 15 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> St. Marys Sportsview Academy <span class="eta">ETA: 20 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Kassmatt Supermarket - Kasarani <span class="eta">ETA: 25 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> ENVIRONMENTAL LIAISON CENTRE INTERNATIONAL <span class="eta">ETA: 30 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Gifts By Wiggi <span class="eta">ETA: 35 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> HIVE CAR TINTING <span class="eta">ETA: 40 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> KARIUKI MURIUKI & COMPANY ADVOCATES <span class="eta">ETA: 45 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Topace Studio Apartments <span class="eta">ETA: 50 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Roybahn Heights Apartments <span class="eta">ETA: 55 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Fleek Car Accessories <span class="eta">ETA: 60 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Happy Life Children's Home <span class="eta">ETA: 65 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Rhoda Muthangya <span class="eta">ETA: 70 mins</span></li>
+    <li><i class="fas fa-map-marker-alt"></i> Mount Laverna School <span class="eta">ETA: 30 mins</span></li>
+  </ul>
+
+  <!-- Driver Details -->
+  <div class="driver-details">
+    <h5>Driver Details</h5>
+    <p><strong>Name:</strong> Mike</p>
+    <p><strong>Phone:</strong> +254706666666</p>
+    <p><strong>Email:</strong> mike@email.com</p>
+  </div>
+
+  <!-- Bus Details -->
+  <div class="bus-details">
+    <h5>Bus Details</h5>
+    <p><strong>Bus Number:</strong> 202MNO</p>
+    <p><strong>Capacity:</strong> 40 Students</p>
+    <p><strong>Bus Type:</strong> Coach</p>
+  </div>
+</div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <!-- Leaflet Routing Machine JS -->
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"
+      defer
+    ></script>
+
+</body>
+</html>
